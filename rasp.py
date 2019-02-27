@@ -5,6 +5,17 @@ import string
 import tkinter as tk
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import animation
+import math
+import time
+
+def cadence():         #return cadence
+    c=5                #cadence value
+    return c
+
+def power(j):           #return power
+    p=10               #power value
+    return p
 
 def excel():
     #def returnCadence (num):
@@ -14,67 +25,64 @@ def excel():
     n=1
 
     #Searches for exixting file of same name
-    match = os.path.exists("D:/EDP Programming/Cycling Session " + str(n)+".xlsx")      
+    match = os.path.exists("D:/EDP Programming/Cycling Session " + str(n)+".xlsx")
 
     while match==True:
-    	n=n+1
-    	match = os.path.exists("D:/EDP Programming/Cycling Session " + str(n)+".xlsx")
+        n=n+1
+        match = os.path.exists("D:/EDP Programming/Cycling Session " + str(n)+".xlsx")
 
     #Names File
-    name_of_file = "Cycling Session " + str(n) 
-    completeName = os.path.join(save_path, name_of_file+".xlsx")	
+    name_of_file = "Cycling Session " + str(n)
+    completeName = os.path.join(save_path, name_of_file+".xlsx")
 
-    # Workbook is created 
-    wb = xlsxwriter.Workbook(completeName) 
-  
-    # add_sheet is used to create sheet. 
+    # Workbook is created
+    wb = xlsxwriter.Workbook(completeName)
+
+    # add_sheet is used to create sheet.
     sheet1 = wb.add_worksheet('Cycling_Data')
 
     #sheet1.add_table('A1:B12')
-  
+
     sheet1.write(0, 0, 'Time (s)')
     sheet1.write(0, 1, 'Cadence (rpm)')
     sheet1.write(0, 2, 'Power (W)')
 
-    #take update cadence and power values initially
-	
-    c=5				#cadence value
-    p=10			#power value
-    i=1				#time iterator
-    
-	#write values in sheet 
-    while c!=0:		
-        sheet1.write(i, 0, i)
-        sheet1.write(i, 1, c)
-        sheet1.write(i, 2, p)
-        i=i+1
-        c=0
+    i=1                #time iterator
+
+    #take cadence and power values initially
+
+    #write values in sheet
+    #while cadence()!=0:
+    sheet1.write(i, 0, i)
+    sheet1.write(i, 1, cadence())
+    sheet1.write(i, 2, power())
+    i=i+1
         #create loop here to update cadence and power
-		
-	
+
+
     #cadence graph
     cadenceChart = wb.add_chart({'type': 'line'})
     sheet1.insert_chart('E2', cadenceChart)
 
     cadenceChart.add_series({
-    	'categories': '=Cycling_Data!$A$2:$A$11',
-    	'values':     '=Cycling_Data!$B$2:$B$11',
-    	'line':       {'color': 'blue'},
+        'categories': '=Cycling_Data!$A$2:$A$11',
+        'values':     '=Cycling_Data!$B$2:$B$11',
+        'line':       {'color': 'blue'},
     })
 
     cadenceChart.set_title({ 'name': 'Cadence (time)'})
     cadenceChart.set_x_axis({'name': 'Time (s)'})
     cadenceChart.set_y_axis({'name': 'Cadence (rpm)'})
     cadenceChart.set_legend({'none': True})
-	
+
     #power graph
     powerChart = wb.add_chart({'type': 'line'})
     sheet1.insert_chart('M2', powerChart)
 
     powerChart.add_series({
-    	'categories': '=Cycling_Data!$A$2:$A$11',
-    	'values':     '=Cycling_Data!$C$2:$C$11',
-    	'line':       {'color': 'red'},
+        'categories': '=Cycling_Data!$A$2:$A$11',
+        'values':     '=Cycling_Data!$C$2:$C$11',
+        'line':       {'color': 'red'},
     })
 
     powerChart.set_title({ 'name': 'Power (time)'})
@@ -85,7 +93,7 @@ def excel():
     wb.close()
 
     #returnCadence (time)
-    
+
     #   return cadence
 
 
@@ -107,15 +115,35 @@ class Application(tk.Frame):
         self.quit.pack(side="bottom")
 
     def say_hi(self):
-        V = np.array([[1,1],[-2,2],[4,-7]])
-        origin = [0], [0] # origin point
+        #while power()!=0:
+        T = 60/cadence()               #time per revolution
+        a = 6.283185/T       #angle for each updated power input
+        #V = [x,y]
+        #V = np.array([[1,1],[-2,2],[4,-7]])
+
         fig = plt.figure()
-        plt.quiver(*origin, V[:,0], V[:,1], color=['r'], scale=21)
+        origin = [0], [0] # origin point
+        ax = plt.axes(xlim=(-1, 1), ylim=(-1,1))
+        line, = ax.plot([], [], lw=2)
+        #plt.quiver(*origin, x, y, color=['r'], scale=30)
+
+        def init():
+            line.set_data([],[])
+            return line,
+
+        def animate(j):
+            x = math.sin(a)*power(j)           #x-component of vector
+            y = math.cos(a)*power(j)           #y-component of vector
+            line.set_data(x,y)
+            return line,
+
+        anim = animation.FuncAnimation(fig, animate, init_func=init, frames =200, interval=20, blit=True)
+
         plt.show()
-        excel()
+            #time.sleep(2)
+            #plt.close()
+            #excel()
 
 root = tk.Tk()
 app = Application(master=root)
 app.mainloop()
-
-
