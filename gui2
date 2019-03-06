@@ -1,0 +1,51 @@
+from kivy.app import App
+from kivy.graphics import Color, Rectangle
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.image import AsyncImage
+from kivy.uix.button import Button
+
+class RootWidget(FloatLayout):
+	pass
+class CustomLayout(FloatLayout):
+
+	def __init__(self, **kwargs):
+		# make sure we aren't overriding any important functionality
+		super(CustomLayout, self).__init__(**kwargs)
+
+		with self.canvas.before:
+			Color(0, 0, 0, 0)  # green; colors range from 0-1 instead of 0-255
+			self.rect = Rectangle(size=self.size, pos=self.pos)
+
+		self.bind(size=self._update_rect, pos=self._update_rect)
+
+	def _update_rect(self, instance, value):
+		self.rect.pos = instance.pos
+		self.rect.size = instance.size
+
+
+class MainApp(App):
+
+	def build(self):
+		root = RootWidget()
+		c = CustomLayout()
+		root.add_widget(c)
+		c.add_widget(
+			AsyncImage(
+				source="C:/users/mya-rae/carbon.jpg",
+				size_hint= (2, 2),
+				pos_hint={'center_x':.5, 'center_y':.5}))
+		c.add_widget(
+			Button(
+				text="START",
+				background_color=(0,1,0,1),
+				size_hint=(.5, .5),
+				pos_hint={'center_x': .5, 'center_y': .5}))
+		#start.bind(on_press = self.begin)
+	#def begin(self):
+		#self.remove_widget(c.start)
+		return root
+
+
+if __name__ == '__main__':
+	MainApp().run()
